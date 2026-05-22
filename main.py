@@ -24,7 +24,7 @@ for I0 in [1000, 10000]:
         im2 = ax2.imshow(y[:, :, 0], cmap='gray')
         plt.colorbar(im2, ax=ax2, format='%.0e', shrink=0.8)
         ax2.set_title('Photon count\n'
-                   r'<Y>: ' f'{np.mean(y[:,:,0]):.2e}\n'
+                    r'<Y>: ' f'{np.mean(y[:,:,0]):.2e}\n'
                     r'V[Y]: ' f'{np.var(y[:,:,0]):.2e}\n'
                     r'sum: ' f'{np.sum(y[:,:,0]):.2f}\n')
 
@@ -34,6 +34,7 @@ for I0 in [1000, 10000]:
         ax3.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left')
         ax3.plot(x_real, gamma_mass_function(Lx, I0/N**2, x_real))
         ax3.set_title('Histogram of intensity')
+        
         y_real = np.arange(0, np.ceil(np.max(y)), 1)
         ax4.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
         ax4.set_title('Histogram of photon count')
