@@ -8,6 +8,7 @@ from utils.math import *
 N = 128
 M = 1500
 
+
 for I0 in [0.1, 1, 2]:
     for Lx in [1, 4]:
         x, y = sim_pg_distrib(I0, Lx, (N, N, M))
