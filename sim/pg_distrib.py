@@ -16,12 +16,10 @@ def sim_pg_distrib(I0, Lx, size):
         - numpy array (with size 'size') of the distribution of the intensity on the sensor
         - numpy array (with size 'size') of photon counts on the sensor
     """
-    (N1, N2) = frame_dim(size)
 
     ## Simulates the speckle
-    int_mean = I0/(N1*N2)
     x = gamma_law(Lx, size)
-    x *= int_mean
+    x *= I0
 
     ## Simulates the photon counting on the sensor
     y = poisson_law(x, size)

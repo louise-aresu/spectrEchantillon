@@ -5,10 +5,10 @@ from sim.pg_distrib import *
 from utils.math import *
 
 ## Paramètres du détecteur
-N = 100
-M = 1000
+N = 128
+M = 1500
 
-for I0 in [1000, 10000]:
+for I0 in [0.1, 1, 2]:
     for Lx in [1, 4]:
         x, y = sim_pg_distrib(I0, Lx, (N, N, M))
 
@@ -28,16 +28,14 @@ for I0 in [1000, 10000]:
                     r'V[Y]: ' f'{np.var(y[:,:,0]):.2e}\n'
                     r'sum: ' f'{np.sum(y[:,:,0]):.2f}\n')
 
-        mu = I0/N**2
-
         x_real = np.arange(0, np.max(x), np.max(x)/100)
         ax3.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left')
-        ax3.plot(x_real, gamma_mass_function(Lx, I0/N**2, x_real))
+        ax3.plot(x_real, gamma_mass_function(Lx, I0, x_real))
         ax3.set_title('Histogram of intensity')
         
         y_real = np.arange(0, np.ceil(np.max(y)), 1)
         ax4.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
         ax4.set_title('Histogram of photon count')
-        ax4.plot(y_real, negbin_mass_function(Lx, I0/N**2, y_real))
+        ax4.plot(y_real, negbin_mass_function(Lx, I0, y_real))
 
 plt.show()
