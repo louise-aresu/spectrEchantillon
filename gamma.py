@@ -5,21 +5,22 @@ from scipy.special import gamma, factorial
 from sim.pkprime_distrib import *
 
 ## Paramètres du détecteur
-N = 1024
-M = 5
+N = 128
+M = 100
 
 ## Intensité du faisceau
-I0 = 20*N**2
+I0 = 0.1
 
 ## Nombres de vues
-Lx = 1
+Lx = 1*np.ones(M)
+Lx[40:60] = 1
 Li = 3
 
 x = np.zeros((N, N, M))
 y = np.zeros((N, N, M))
 
 for m in range(M):
-    x[:, :, m], y[:, :, m] = pkprime_distrib(I0, Li, Lx, (N, N))
+    x[:, :, m], y[:, :, m] = pkprime_distrib(I0, Li, Lx[m], (N, N))
 
 # for m in range(M):
 #     fig, (ax1, ax2) = plt.subplots(1, 2)
@@ -38,15 +39,23 @@ for m in range(M):
 #                 r'V[Y]: ' f'{np.var(y[:,:,m]):.2e}\n'
 #                 r'sum: ' f'{np.sum(y[:,:,m]):.2f}\n')
 
-mu = I0/N**2
+# fig, (ax1, ax2) = plt.subplots(1, 2)
 
-fig, (ax1, ax2) = plt.subplots(1, 2)
+# x_real = np.arange(0, np.max(x), np.max(x)/100)
+# ax1.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left')
+# ax1.set_title('Histogram of X')
+#
+# y_real = np.arange(0, np.ceil(np.max(y)), 1)
+# ax2.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
+# ax2.set_title('Histogram of Y')
+# plt.show()
 
-x_real = np.arange(0, np.max(x), np.max(x)/100)
-ax1.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left')
-ax1.set_title('Histogram of X')
+Corr = np.zeros((M, M))
+for t1 in range(M-1, -1, -1):
+    for t2 in range(M):
+        Corr[t1, t2] = np.mean(y[:,:,t1] * y[:,:,t2])
 
-y_real = np.arange(0, np.ceil(np.max(y)), 1)
-ax2.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
-ax2.set_title('Histogram of Y')
+plt.figure()
+im1 = plt.imshow(Corr, origin='lower')
+plt.colorbar(im1)
 plt.show()
