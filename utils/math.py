@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.special import gamma, factorial
+from scipy.special import gamma, factorial, digamma
 
 gen = np.random.default_rng()
 
