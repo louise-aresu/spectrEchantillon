@@ -2,11 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from sim.pg_distrib import *
+from estim.moments import *
 from utils.math import *
 
 ## Paramètres du détecteur
 N = 128
-M = 100
+M = 1500
 
 # for I0 in [0.1, 1, 2]:
 #     for Lx in [1, 4]:
@@ -40,60 +41,42 @@ M = 100
 #
 #plt.show()
 
-I0 = 0.05
-Lx = 3
+I0 = 0.1
+Lx = 0.5
 
-# nbsimu = 1
-# res = 0.01 * np.ones((4, nbsimu))
-#
-# for order in range(2, 6):
-#     for i in range(nbsimu):
-#         _, y = sim_pg_distrib(I0, Lx, (N, N, M))
-#         m1 = np.mean(y)
-#         Y = 1
-#         for o in range(order):
-#             Y *= y-o
-#         mo = np.mean(Y)
-#
-#         f = lambda alpha: 1 / (alpha ** order) * gamma(order + alpha) / gamma(alpha)
-#         g = lambda alpha: f(alpha) - mo / (m1 ** order)
-#         gprime = lambda alpha: f(alpha) * (-order / alpha + digamma(alpha + order) - digamma(alpha))
-#
-#         for _ in range(100):
-#             res[order-2][i] -= g(res[order-2][i])/gprime(res[order-2][i])
-#
-# for order in range(2, 6):
-#     print("Order ", order, ":")
-#     print("Moyenne: ", np.mean(res[order-2]))
-#     print("Variance: ", np.var(res[order-2]))
-#
-# res2 = np.zeros((nbsimu))
-# for i in range(nbsimu):
-#     _, y = sim_pg_distrib(I0, Lx, (N, N, M))
-#     m1 = np.mean(y)
-#     m2 = np.mean(y*(y-1))
-#     res2[i] = m1**2/(m2-m1**2)
-#
-# print("Estimation par expression de L:")
-# print("Moyenne: ", np.mean(res2))
-# print("Variance: ", np.var(res2))
+nbesti = 100
+estI0 = []
+estLx = []
 
-Lx = np.ones((M))
-Lx[60:80] = 0.1
+for i in range(nbesti):
+    _, y = sim_pg_distrib(I0,Lx, (N, N, M))
+    estim = moments_pg_distrib_estimation(y)
+    estI0.append(estim[0])
+    estLx.append(estim[1])
 
-y = np.zeros((N, N, M))
-for m in range(M):
-    _, y[:,:,m] = sim_pg_distrib(I0, Lx[m], (N, N))
+I0bar = np.mean(estI0)
+Lxbar = np.mean(estLx)
+I0var = np.var(estI0)
+Lxvar = np.var(estLx)
 
-Corr = np.zeros((M, M))
-for t1 in range(M-1, -1, -1):
-    for t2 in range(M):
-        if t1 == t2:
-            Corr[t1, t2] = 1
-        else:
-            Corr[t1, t2] = np.mean(y[:,:,t1] * y[:,:,t2])/(np.mean(y[:,:,t1]) * np.mean(y[:,:,t2]))
 
-plt.figure()
-im1 = plt.imshow(Corr, origin='lower')
-plt.colorbar(im1)
+fig, (ax1, ax2) = plt.subplots(1, 2)
+
+ax1.set_title(r"Estimation de $I_0$")
+ax1.hist(estI0, bins='auto', rwidth=0.9, align='mid')
+ax1.text(0.95, 0.95,
+         r"$\widebar{\hat{I_0}}$: " f"{I0bar:.2e}\n"
+         r"Var($\hat{I_0}$): " f"{I0var:.2e}\n"
+         f"Biais: {np.abs(I0bar-I0): .2e}",
+         ha='right', va='top', transform=ax1.transAxes, bbox=dict(facecolor='w', edgecolor='k'))
+
+ax2.set_title(r"Estimation de $L_x$")
+ax2.hist(estLx, bins='auto', rwidth=0.9, align='mid')
+ax2.text(0.95, 0.95,
+         r"$\widebar{\hat{L_X}}$: " f"{Lxbar:.2e}\n"
+         r"Var($\hat{L_X}$): " f"{Lxvar:.2e}\n"
+         f"Biais: {np.abs(Lxbar-Lx): .2e}",
+         ha='right', va='top', transform=ax2.transAxes, bbox=dict(facecolor='w', edgecolor='k'))
+
+#fig.tight_layout()
 plt.show()
