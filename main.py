@@ -62,21 +62,23 @@ Lxvar = np.var(estLx)
 
 fig, (ax1, ax2) = plt.subplots(1, 2)
 
-ax1.set_title(r"Estimation de $I_0$")
+ax1.set_title(r"Estimation de $I_0$", size="xx-large")
 ax1.hist(estI0, bins='auto', rwidth=0.9, align='mid')
-ax1.text(0.95, 0.95,
+ax1.text(0.01, 0.99,
          r"$\widebar{\hat{I_0}}$: " f"{I0bar:.2e}\n"
          r"Var($\hat{I_0}$): " f"{I0var:.2e}\n"
          f"Biais: {np.abs(I0bar-I0): .2e}",
-         ha='right', va='top', transform=ax1.transAxes, bbox=dict(facecolor='w', edgecolor='k'))
+         ha='left', va='top', transform=ax1.transAxes, size="xx-large",
+         bbox=dict(facecolor='w', edgecolor='k'))
 
-ax2.set_title(r"Estimation de $L_x$")
+ax2.set_title(r"Estimation de $L_x$", size="xx-large")
 ax2.hist(estLx, bins='auto', rwidth=0.9, align='mid')
-ax2.text(0.95, 0.95,
+ax2.text(0.01 , 0.99,
          r"$\widebar{\hat{L_X}}$: " f"{Lxbar:.2e}\n"
          r"Var($\hat{L_X}$): " f"{Lxvar:.2e}\n"
          f"Biais: {np.abs(Lxbar-Lx): .2e}",
-         ha='right', va='top', transform=ax2.transAxes, bbox=dict(facecolor='w', edgecolor='k'))
+         ha='left', va='top', transform=ax2.transAxes, size="xx-large",
+         bbox=dict(facecolor='w', edgecolor='k'))
 
-#fig.tight_layout()
+fig.tight_layout()
 plt.show()
