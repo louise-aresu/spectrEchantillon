@@ -1,7 +1,10 @@
 import numpy as np
-from scipy.special import gamma, factorial, digamma
+from scipy.special import gamma, factorial, digamma, binom
 
 gen = np.random.default_rng()
+
+def poisson_mass_function(mu, k):
+    return np.exp(-mu)*(mu**k)/factorial(k)
 
 def gamma_law(L, size):
     """
@@ -33,7 +36,7 @@ def gamma_mass_function(L, mu, x):
     Multiply stochastic representations for K distributions and  their Poisson transforms
     by Malvin G. Teich and Paul DIament
     """
-    return 1/gamma(L)*(L/mu)**L * x**(L-1)*np.exp(-L*x/mu)
+    return 1/gamma(L)*np.exp(-L*x/mu)*(L/mu)**L * x**(L-1)
 
 
 def poisson_law(mu, size):
@@ -60,4 +63,4 @@ def negbin_mass_function(L, mu, x):
 
     Returns an array of the mass function of the negative binomial law
     """
-    return L**L / gamma(L) * gamma(x+L)/factorial(x) * mu**x/(mu+L)**(x+L)
+    return binom(x+L-1, x) * (L / (mu+L))**L * (mu / (mu+L))**x
