@@ -9,12 +9,27 @@ from utils.math import *
 N = 128
 M = 1500
 
-for I0 in [1e-2, 1e-1, 1e0, 1e1]:
-    for Lx in [1e0, 1e1]:
+#for I0 in [1e-2, 1e-1, 1e0, 1e1]:
+#    for Lx in [1e0, 1e1]:
+for I0 in [1e-3]:
+    for Lx in [1e1]:
         x, y = sim_pg_distrib(I0, Lx, (N, N, M))
 
-        fig, ((topx, topy), (botx, boty)) = plt.subplots(2, 2, figsize=(12, 6), gridspec_kw={'height_ratios': [2, 1]})
-        plt.subplots_adjust(wspace=0.5, hspace=None)
+        xbins = np.linspace(0, np.max(x)+I0/100, 100)
+        xhist = np.histogram(x, bins=xbins, density=True)[0]
+        xbins = xbins[:-1]
+
+        ybins = np.arange(0, np.max(y)+1, 1)
+        yhist = np.histogram(y, bins=ybins, density=True)[0]
+        ybins = ybins[:-1]
+
+
+
+        fig, ((topx, mt, topy), (botx, mb, boty)) = plt.subplots(2, 3, figsize=(10, 4), gridspec_kw={'height_ratios': [3, 4], 'width_ratios': [3, 1, 3]})
+        #plt.subplots_adjust(wspace=None, hspace=None)
+
+        mt.set_axis_off()
+        mb.set_axis_off()
 
         plt.suptitle(r"$I_0 = $" f"{I0:.2e}\n"
                      r"$L_X = $" f"{Lx:.2e}")
@@ -24,18 +39,30 @@ for I0 in [1e-2, 1e-1, 1e0, 1e1]:
         topy.set_title(r'$\widebar{Y} : $' f'{np.mean(y[:,:,:]):.2e}\n'
                        r'$\text{Var}(Y): $' f'{np.var(y[:,:,:]):.2e}')
 
-        y_real = np.arange(0, np.ceil(np.max(y)), 1)
-        boty.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
-        boty.plot(y_real, negbin_mass_function(Lx, I0, y_real))
+        #boty.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
+        negbin = negbin_mass_function(Lx, I0, ybins)
+
+        boty.semilogy(ybins, negbin, color='orange')
+        boty.scatter(ybins, yhist)
+        for i in range(len(ybins)):
+            boty.plot([ybins[i], ybins[i]], [0, yhist[i]], '--k', lw=0.5)
+
+        for i in ybins:
+            boty.errorbar(ybins[i], negbin[i], 3/(N*np.sqrt(M))*np.sqrt(negbin[i]*(1-negbin[i])),
+                          fmt='None', color='black', capsize=5)
 
         imgx = topx.imshow(x[:, :, 0], cmap='gray')
         plt.colorbar(imgx, ax=topx, format='%.0e', shrink=1)
         topx.set_title(r'$\widebar{X} : $' f'{np.mean(x[:, :, :]):.2e}\n'
                        r'$\text{Var}(X): $' f'{np.var(x[:, :, :]):.2e}')
 
-        x_real = np.linspace(0, np.max(x), 100)
-        botx.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left', rwidth=0.8)
-        botx.plot(x_real, gamma_mass_function(Lx, I0, x_real))
+
+        #botx.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left', rwidth=0.8)
+        botx.plot(xbins, gamma_mass_function(Lx, I0, xbins), color='orange')
+        botx.scatter(xbins, xhist)
+        for i in range(len(xbins)):
+            botx.plot([xbins[i], xbins[i]], [0, xhist[i]], '--k', lw=0.5)
+
 
 plt.show()
 
