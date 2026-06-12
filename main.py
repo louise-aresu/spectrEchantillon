@@ -9,67 +9,168 @@ from utils.math import *
 N = 128
 M = 1500
 
+## GRAPHES
 #for I0 in [1e-2, 1e-1, 1e0, 1e1]:
 #    for Lx in [1e0, 1e1]:
-for I0 in [1e-3]:
-    for Lx in [1e1]:
-        x, y = sim_pg_distrib(I0, Lx, (N, N, M))
 
-        xbins = np.linspace(0, np.max(x)+I0/100, 100)
-        xhist = np.histogram(x, bins=xbins, density=True)[0]
-        xbins = xbins[:-1]
+# for I0 in [1e-1]:
+#     for Lx in [5e0]:
+#         x, y = sim_pg_distrib(I0, Lx, (N, N, M))
+#
+#         xbins = np.linspace(0, np.max(x)+I0/100, 100)
+#         xhist = np.histogram(x, bins=xbins, density=True)[0]
+#         xbins = xbins[:-1]
+#
+#         ybins = np.arange(0, np.max(y)+3, 1)
+#         yhist = np.histogram(y, bins=ybins, density=True)[0]
+#         ybins = ybins[:-1]
+#
+#
+#
+#         fig, ((topx, mt, topy), (botx, mb, boty)) = plt.subplots(2, 3, figsize=(10, 4), gridspec_kw={'height_ratios': [3, 4], 'width_ratios': [3, 1, 3]})
+#         plt.subplots_adjust(top=0.85)
+#
+#         mt.set_axis_off()
+#         mb.set_axis_off()
+#
+#         for ax in (topx, botx,topy, boty):
+#             ax.set_anchor('N')
+#
+#         plt.suptitle(r"$I_0 = $" f"{I0:.2e}\n"
+#                      r"$L_X = $" f"{Lx:.2e}")
+#
+#         imgy = topy.imshow(y[:, :, 0], cmap='gray')
+#         plt.colorbar(imgy, ax=topy, format='%.0e', shrink=1)
+#         topy.set_title(r'$\widebar{Y} : $' f'{np.mean(y[:,:,:]):.2e}\n'
+#                        r'$\text{Var}(Y): $' f'{np.var(y[:,:,:]):.2e}')
+#
+#         #boty.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
+#         negbin = negbin_mass_function(I0, Lx, ybins)
+#
+#         boty.semilogy(ybins, negbin, color='orange')
+#         boty.scatter(ybins, yhist)
+#         for i in range(len(ybins)):
+#             boty.plot([ybins[i], ybins[i]], [0, yhist[i]], '--k', lw=0.5)
+#
+#         for i in ybins:
+#             boty.errorbar(ybins[i], negbin[i], 3/(N*np.sqrt(M))*np.sqrt(negbin[i]*(1-negbin[i])),
+#                           fmt='None', color='black', capsize=5)
+#
+#         imgx = topx.imshow(x[:, :, 0], cmap='gray')
+#         plt.colorbar(imgx, ax=topx, format='%.0e', shrink=1)
+#         topx.set_title(r'$\widebar{X} : $' f'{np.mean(x[:, :, :]):.2e}\n'
+#                        r'$\text{Var}(X): $' f'{np.var(x[:, :, :]):.2e}')
+#
+#
+#         #botx.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left', rwidth=0.8)
+#         botx.plot(xbins, gamma_mass_function(I0, Lx, xbins), color='orange')
+#         botx.scatter(xbins, xhist)
+#         for i in range(len(xbins)):
+#             botx.plot([xbins[i], xbins[i]], [0, xhist[i]], '--k', lw=0.5)
+#
+# plt.show()
 
-        ybins = np.arange(0, np.max(y)+1, 1)
-        yhist = np.histogram(y, bins=ybins, density=True)[0]
-        ybins = ybins[:-1]
 
+## TEST FONCTIONS DENSITE ET COHERENCE AVEC LOI DE BERNOUILI
+# Lx = 2
+# for I0 in [1e-3, 5e-3, 1e-2, 5e-2, 1e-1]:
+#     _, y = sim_pg_distrib(I0, Lx, (N, N, M))
+#
+#     hist, bins = np.histogram(y, bins=np.arange(np.max(y)+3), density=True)
+#     hist = hist[:-1]
+#     bins = bins[:-2]
+#
+#     nb = negbin_mass_function(I0, Lx, bins)
+#     dev = 1/(N*np.sqrt(M)) * np.sqrt(nb * (1 - nb))
+#     error = np.sum(((hist - nb) / dev) ** 2)
+#
+#     plt.figure()
+#     plt.title(f'{I0}\n{error}')
+#     plt.scatter(bins, hist, marker='+', color='orange')
+#     plt.errorbar(bins, nb, dev,
+#                 marker='+', fmt=':', color='black', capsize=5)
+#plt.show()
 
+## PRECISION DES MOMENTS FACTORIELS
+# I0 = 1e-2
+# Lxs = np.linspace(1e0, 4e0, 15)
+# nbsimu = 10
+#
+# temp = np.ndarray((4, len(Lxs), nbsimu))
+# for iLx in range(len(Lxs)):
+#     for i in range(nbsimu):
+#         _, y = sim_pg_distrib(I0, Lxs[iLx], (N,N,M))
+#         temp[:, iLx, i] = [np.mean(y),
+#                            np.mean(y**2),
+#                            np.mean(y**3),
+#                            np.mean(y**4)]
+#
+# mean = np.ndarray((4, len(Lxs)))
+# mean = np.mean(temp, axis=2)
+# var = np.var(temp, axis=2)
+#
+# colors = ['b', 'g', 'r', 'm']
+#
+# plt.figure()
+# for i in range(4):
+#     plt.errorbar(Lxs, mean[i, :], 2*np.sqrt(var[i, :]),
+#                  marker='+', linestyle='--', capsize=5, color=colors[i])
+#
+#     if i == 0:
+#         plt.plot(Lxs, I0*np.ones_like(Lxs), linestyle=':', color=colors[i], label="Order 1")
+#
+#     if i == 1:
+#         plt.plot(Lxs, I0**2 * (1+1/Lxs) + I0, linestyle=':', color=colors[i], label="Order 2")
+#
+#     if i == 2:
+#         plt.plot(Lxs, negbin_num_moment(I0, Lxs, 3), linestyle=':', color=colors[i], label="Order 3")
+#
+#     if i == 3:
+#         plt.plot(Lxs, negbin_num_moment(I0, Lxs, 4), linestyle=':', color=colors[i], label="Order 4")
+#
+#
+# plt.title("Moments")
+# plt.xlabel('Form factor $L_X$')
+# plt.legend()
+# plt.show()
+#
+# print(moments)
 
-        fig, ((topx, mt, topy), (botx, mb, boty)) = plt.subplots(2, 3, figsize=(10, 4), gridspec_kw={'height_ratios': [3, 4], 'width_ratios': [3, 1, 3]})
-        #plt.subplots_adjust(wspace=None, hspace=None)
+## Resolution des moments
+plt.figure()
 
-        mt.set_axis_off()
-        mb.set_axis_off()
+I0 = 1e-3
+Lxs = np.linspace(1, 4e0, 10)
+dL = Lxs[1] - Lxs[0]
 
-        plt.suptitle(r"$I_0 = $" f"{I0:.2e}\n"
-                     r"$L_X = $" f"{Lx:.2e}")
+h = 1e-5
+der = np.ndarray((4, len(Lxs)))
+for i in range(1, 5):
+    der[i-1, :] = (negbin_num_moment(I0, Lxs + h, i) - negbin_num_moment(I0, Lxs, i)) / h
 
-        imgy = topy.imshow(y[:, :, 0], cmap='gray')
-        plt.colorbar(imgy, ax=topy, format='%.0e', shrink=1)
-        topy.set_title(r'$\widebar{Y} : $' f'{np.mean(y[:,:,:]):.2e}\n'
-                       r'$\text{Var}(Y): $' f'{np.var(y[:,:,:]):.2e}')
+nbsimu = 10
+temp = np.ndarray((4, len(Lxs), nbsimu))
+for iLx in range(len(Lxs)):
+    for i in range(nbsimu):
+        _, y = sim_pg_distrib(I0, Lxs[iLx], (N,N,M))
+        temp[:, iLx, i] = [np.mean(y),
+                           np.mean(y**2),
+                           np.mean(y**3),
+                           np.mean(y**4)]
+var = np.var(temp, axis=2)
 
-        #boty.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
-        negbin = negbin_mass_function(Lx, I0, ybins)
+for i in range(4):
+    plt.plot(Lxs, np.abs(der[i, :])/np.sqrt(var[i, :]), label=f'Order {i}')
+plt.text(2.5, 0.6, r'$I_0 = $' f'{I0}', fontsize=20)
 
-        boty.semilogy(ybins, negbin, color='orange')
-        boty.scatter(ybins, yhist)
-        for i in range(len(ybins)):
-            boty.plot([ybins[i], ybins[i]], [0, yhist[i]], '--k', lw=0.5)
-
-        for i in ybins:
-            boty.errorbar(ybins[i], negbin[i], 3/(N*np.sqrt(M))*np.sqrt(negbin[i]*(1-negbin[i])),
-                          fmt='None', color='black', capsize=5)
-
-        imgx = topx.imshow(x[:, :, 0], cmap='gray')
-        plt.colorbar(imgx, ax=topx, format='%.0e', shrink=1)
-        topx.set_title(r'$\widebar{X} : $' f'{np.mean(x[:, :, :]):.2e}\n'
-                       r'$\text{Var}(X): $' f'{np.var(x[:, :, :]):.2e}')
-
-
-        #botx.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left', rwidth=0.8)
-        botx.plot(xbins, gamma_mass_function(Lx, I0, xbins), color='orange')
-        botx.scatter(xbins, xhist)
-        for i in range(len(xbins)):
-            botx.plot([xbins[i], xbins[i]], [0, xhist[i]], '--k', lw=0.5)
-
-
+plt.legend()
 plt.show()
 
-# I0 = 10
-# Lx = 1
+
+# I0 = 5e-3
+# Lx = 2
 #
-# nbesti = 1
+# nbesti = 100
 # estI0 = []
 # estLx = []
 #
