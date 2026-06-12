@@ -22,11 +22,11 @@ def gamma_law(L, size):
     return gen.gamma(shape=L, scale=1/L, size=size)
 
 
-def gamma_mass_function(L, mu, x):
+def gamma_mass_function(mu, L, x):
     """
     @param:
-        - L : Degrees of freedom
         - mu : Mean
+        - L : Degrees of freedom
         - x : Real number array
 
     @return:
@@ -52,11 +52,11 @@ def poisson_law(mu, size):
     return gen.poisson(lam=mu, size=size)
 
 
-def negbin_mass_function(L, mu, x):
+def negbin_mass_function(mu, L, x):
     """
     @param:
-        - L : Degrees of freedom
         - mu : Mean
+        - L : Degrees of freedom
         - x : Integer array
     @return:
         - numpy array (with the same size as x)
@@ -64,3 +64,9 @@ def negbin_mass_function(L, mu, x):
     Returns an array of the mass function of the negative binomial law
     """
     return binom(x+L-1, x) * (L / (mu+L))**L * (mu / (mu+L))**x
+
+def negbin_num_moment(mu, L, m):
+    res = 0
+    for i in range(10):
+        res += i**m * negbin_mass_function(mu, L, i)
+    return res
