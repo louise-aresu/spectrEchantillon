@@ -10,65 +10,67 @@ N = 128
 M = 1500
 
 ## GRAPHES
-#for I0 in [1e-2, 1e-1, 1e0, 1e1]:
-#    for Lx in [1e0, 1e1]:
+for I0 in [1e-2, 1e-1, 1e0, 1e1]:
+   for Lx in [1e0, 1e1]:
 
-# for I0 in [1e-1]:
+# for I0 in [1e-3]:
 #     for Lx in [5e0]:
-#         x, y = sim_pg_distrib(I0, Lx, (N, N, M))
-#
-#         xbins = np.linspace(0, np.max(x)+I0/100, 100)
-#         xhist = np.histogram(x, bins=xbins, density=True)[0]
-#         xbins = xbins[:-1]
-#
-#         ybins = np.arange(0, np.max(y)+3, 1)
-#         yhist = np.histogram(y, bins=ybins, density=True)[0]
-#         ybins = ybins[:-1]
-#
-#
-#
-#         fig, ((topx, mt, topy), (botx, mb, boty)) = plt.subplots(2, 3, figsize=(10, 4), gridspec_kw={'height_ratios': [3, 4], 'width_ratios': [3, 1, 3]})
-#         plt.subplots_adjust(top=0.85)
-#
-#         mt.set_axis_off()
-#         mb.set_axis_off()
-#
-#         for ax in (topx, botx,topy, boty):
-#             ax.set_anchor('N')
-#
-#         plt.suptitle(r"$I_0 = $" f"{I0:.2e}\n"
-#                      r"$L_X = $" f"{Lx:.2e}")
-#
-#         imgy = topy.imshow(y[:, :, 0], cmap='gray')
-#         plt.colorbar(imgy, ax=topy, format='%.0e', shrink=1)
-#         topy.set_title(r'$\widebar{Y} : $' f'{np.mean(y[:,:,:]):.2e}\n'
-#                        r'$\text{Var}(Y): $' f'{np.var(y[:,:,:]):.2e}')
-#
-#         #boty.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
-#         negbin = negbin_mass_function(I0, Lx, ybins)
-#
-#         boty.semilogy(ybins, negbin, color='orange')
-#         boty.scatter(ybins, yhist)
-#         for i in range(len(ybins)):
-#             boty.plot([ybins[i], ybins[i]], [0, yhist[i]], '--k', lw=0.5)
-#
-#         for i in ybins:
-#             boty.errorbar(ybins[i], negbin[i], 3/(N*np.sqrt(M))*np.sqrt(negbin[i]*(1-negbin[i])),
-#                           fmt='None', color='black', capsize=5)
-#
-#         imgx = topx.imshow(x[:, :, 0], cmap='gray')
-#         plt.colorbar(imgx, ax=topx, format='%.0e', shrink=1)
-#         topx.set_title(r'$\widebar{X} : $' f'{np.mean(x[:, :, :]):.2e}\n'
-#                        r'$\text{Var}(X): $' f'{np.var(x[:, :, :]):.2e}')
-#
-#
-#         #botx.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left', rwidth=0.8)
-#         botx.plot(xbins, gamma_mass_function(I0, Lx, xbins), color='orange')
-#         botx.scatter(xbins, xhist)
-#         for i in range(len(xbins)):
-#             botx.plot([xbins[i], xbins[i]], [0, xhist[i]], '--k', lw=0.5)
-#
-# plt.show()
+        x, y = sim_pg_distrib(I0, Lx, (N, N, M))
+
+        xbins = np.linspace(0, np.max(x)+I0/100, 100)
+        xhist = np.histogram(x, bins=xbins, density=True)[0]
+        xbins = xbins[:-1]
+
+        ybins = np.arange(0, np.max(y)+3, 1)
+        yhist = np.histogram(y, bins=ybins, density=True)[0]
+        ybins = ybins[:-1]
+
+
+
+        fig, ((topx, mt, topy), (botx, mb, boty)) = plt.subplots(2, 3, figsize=(8, 4), gridspec_kw={'height_ratios': [6, 7], 'width_ratios': [3, 1, 3]})
+        plt.subplots_adjust(top=0.85)
+
+        mt.set_axis_off()
+        mb.set_axis_off()
+
+        for ax in (topx, botx,topy, boty):
+            ax.set_anchor('N')
+
+        plt.suptitle(r"$I_0 = $" f"{I0:.2e}\n"
+                     r"$L_X = $" f"{Lx:.2e}")
+
+        imgy = topy.imshow(y[:, :, 0], cmap='gray')
+        plt.colorbar(imgy, ax=topy, format='%.0e', shrink=1)
+        topy.set_title(r'$\widebar{Y} : $' f'{np.mean(y[:,:,:]):.2e}\n'
+                       r'$\text{Var}(Y): $' f'{np.var(y[:,:,:]):.2e}')
+
+        #boty.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
+        negbin = negbin_mass_function(I0, Lx, ybins)
+
+        boty.semilogy(ybins, negbin, color='orange')
+        boty.scatter(ybins, yhist)
+        for i in range(len(ybins)):
+            boty.plot([ybins[i], ybins[i]], [0, yhist[i]], '--k', lw=0.5)
+
+        for i in ybins:
+            boty.errorbar(ybins[i], negbin[i], 3/(N*np.sqrt(M))*np.sqrt(negbin[i]*(1-negbin[i])),
+                          fmt='None', color='black', capsize=5)
+        boty.set_xlabel('Nombre de photons sur un pixel')
+
+        imgx = topx.imshow(x[:, :, 0], cmap='gray')
+        plt.colorbar(imgx, ax=topx, format='%.0e', shrink=1)
+        topx.set_title(r'$\widebar{X} : $' f'{np.mean(x[:, :, :]):.2e}\n'
+                       r'$\text{Var}(X): $' f'{np.var(x[:, :, :]):.2e}')
+
+
+        #botx.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left', rwidth=0.8)
+        botx.plot(xbins, gamma_mass_function(I0, Lx, xbins), color='orange')
+        botx.scatter(xbins, xhist)
+        for i in range(len(xbins)):
+            botx.plot([xbins[i], xbins[i]], [0, xhist[i]], '--k', lw=0.5)
+        botx.set_xlabel('Intensité sur un pixel')
+
+plt.show()
 
 
 ## TEST FONCTIONS DENSITE ET COHERENCE AVEC LOI DE BERNOUILI
@@ -137,34 +139,35 @@ M = 1500
 # print(moments)
 
 ## Resolution des moments
-plt.figure()
-
-I0 = 1e-3
-Lxs = np.linspace(1, 4e0, 10)
-dL = Lxs[1] - Lxs[0]
-
-h = 1e-5
-der = np.ndarray((4, len(Lxs)))
-for i in range(1, 5):
-    der[i-1, :] = (negbin_num_moment(I0, Lxs + h, i) - negbin_num_moment(I0, Lxs, i)) / h
-
-nbsimu = 10
-temp = np.ndarray((4, len(Lxs), nbsimu))
-for iLx in range(len(Lxs)):
-    for i in range(nbsimu):
-        _, y = sim_pg_distrib(I0, Lxs[iLx], (N,N,M))
-        temp[:, iLx, i] = [np.mean(y),
-                           np.mean(y**2),
-                           np.mean(y**3),
-                           np.mean(y**4)]
-var = np.var(temp, axis=2)
-
-for i in range(4):
-    plt.plot(Lxs, np.abs(der[i, :])/np.sqrt(var[i, :]), label=f'Order {i}')
-plt.text(2.5, 0.6, r'$I_0 = $' f'{I0}', fontsize=20)
-
-plt.legend()
-plt.show()
+# plt.figure()
+#
+# I0 = 1e-3
+# Lxs = np.linspace(1, 4e0, 10)
+# dL = Lxs[1] - Lxs[0]
+#
+# h = 1e-5
+# der = np.ndarray((4, len(Lxs)))
+# for i in range(1, 5):
+#     der[i-1, :] = (negbin_num_moment(I0, Lxs + h, i) - negbin_num_moment(I0, Lxs, i)) / h
+#
+# nbsimu = 10
+# temp = np.ndarray((4, len(Lxs), nbsimu))
+# for iLx in range(len(Lxs)):
+#     for i in range(nbsimu):
+#         _, y = sim_pg_distrib(I0, Lxs[iLx], (N,N,M))
+#         temp[:, iLx, i] = [np.mean(y),
+#                            np.mean(y**2),
+#                            np.mean(y**3),
+#                            np.mean(y**4)]
+# var = np.var(temp, axis=2)
+#
+# for i in range(4):
+#     plt.plot(Lxs, np.abs(der[i, :])/np.sqrt(var[i, :]), label=f'Order {i}')
+# plt.text(2.5, 0.6, r'$I_0 = $' f'{I0}', fontsize=20)
+#
+# plt.xlabel(r'Form factor $L_X$')
+# plt.legend()
+# plt.show()
 
 
 # I0 = 5e-3
