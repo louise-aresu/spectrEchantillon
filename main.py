@@ -9,69 +9,73 @@ from utils.math import *
 N = 128
 M = 1500
 
-## GRAPHES
-for I0 in [1e-2, 1e-1, 1e0, 1e1]:
-   for Lx in [1e0, 1e1]:
+def plot_figure(I0s, Lxs, N, M):
+    for I0 in I0s:
+       for Lx in Lxs:
+            x, y = sim_pg_distrib(I0, Lx, (N, N, M))
 
-# for I0 in [1e-3]:
-#     for Lx in [5e0]:
-        x, y = sim_pg_distrib(I0, Lx, (N, N, M))
+            xbins = np.linspace(0, np.max(x)+I0/100, 100)
+            xhist = np.histogram(x, bins=xbins, density=True)[0]
+            xbins = xbins[:-1]
 
-        xbins = np.linspace(0, np.max(x)+I0/100, 100)
-        xhist = np.histogram(x, bins=xbins, density=True)[0]
-        xbins = xbins[:-1]
+            ybins = np.arange(0, np.max(y)+3, 1)
+            yhist = np.histogram(y, bins=ybins, density=True)[0]
+            ybins = ybins[:-1]
 
-        ybins = np.arange(0, np.max(y)+3, 1)
-        yhist = np.histogram(y, bins=ybins, density=True)[0]
-        ybins = ybins[:-1]
+            fig, ((topx, mt, topy), (botx, mb, boty)) = plt.subplots(2, 3, figsize=(8, 4), gridspec_kw={'height_ratios': [6, 7], 'width_ratios': [3, 1, 3]})
+            plt.subplots_adjust(top=0.85)
 
+            mt.set_axis_off()
+            mb.set_axis_off()
 
+            for ax in (topx, botx,topy, boty):
+                ax.set_anchor('N')
 
-        fig, ((topx, mt, topy), (botx, mb, boty)) = plt.subplots(2, 3, figsize=(8, 4), gridspec_kw={'height_ratios': [6, 7], 'width_ratios': [3, 1, 3]})
-        plt.subplots_adjust(top=0.85)
+            plt.suptitle(r"$I_0 = $" f"{I0:.2e}\n"
+                         r"$L_X = $" f"{Lx:.2e}")
 
-        mt.set_axis_off()
-        mb.set_axis_off()
+            imgy = topy.imshow(y[:, :, 0], cmap='gray')
+            plt.colorbar(imgy, ax=topy, format='%.0e', shrink=1)
+            topy.set_title(r'$\widebar{Y} : $' f'{np.mean(y[:,:,:]):.2e}\n'
+                           r'$\text{Var}(Y): $' f'{np.var(y[:,:,:]):.2e}')
 
-        for ax in (topx, botx,topy, boty):
-            ax.set_anchor('N')
+            #boty.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
+            negbin = negbin_mass_function(I0, Lx, ybins)
 
-        plt.suptitle(r"$I_0 = $" f"{I0:.2e}\n"
-                     r"$L_X = $" f"{Lx:.2e}")
+            boty.semilogy(ybins, negbin, color='orange')
+            boty.scatter(ybins, yhist)
+            for i in range(len(ybins)):
+                boty.plot([ybins[i], ybins[i]], [0, yhist[i]], '--k', lw=0.5)
 
-        imgy = topy.imshow(y[:, :, 0], cmap='gray')
-        plt.colorbar(imgy, ax=topy, format='%.0e', shrink=1)
-        topy.set_title(r'$\widebar{Y} : $' f'{np.mean(y[:,:,:]):.2e}\n'
-                       r'$\text{Var}(Y): $' f'{np.var(y[:,:,:]):.2e}')
+            for i in ybins:
+                boty.errorbar(ybins[i], negbin[i], 3/(N*np.sqrt(M))*np.sqrt(negbin[i]*(1-negbin[i])),
+                              fmt='None', color='black', capsize=5)
+            boty.set_xlabel('Nombre de photons sur un pixel')
 
-        #boty.hist(y.flatten(), density=True, stacked=True, bins=y_real, align='left', rwidth=0.8)
-        negbin = negbin_mass_function(I0, Lx, ybins)
-
-        boty.semilogy(ybins, negbin, color='orange')
-        boty.scatter(ybins, yhist)
-        for i in range(len(ybins)):
-            boty.plot([ybins[i], ybins[i]], [0, yhist[i]], '--k', lw=0.5)
-
-        for i in ybins:
-            boty.errorbar(ybins[i], negbin[i], 3/(N*np.sqrt(M))*np.sqrt(negbin[i]*(1-negbin[i])),
-                          fmt='None', color='black', capsize=5)
-        boty.set_xlabel('Nombre de photons sur un pixel')
-
-        imgx = topx.imshow(x[:, :, 0], cmap='gray')
-        plt.colorbar(imgx, ax=topx, format='%.0e', shrink=1)
-        topx.set_title(r'$\widebar{X} : $' f'{np.mean(x[:, :, :]):.2e}\n'
-                       r'$\text{Var}(X): $' f'{np.var(x[:, :, :]):.2e}')
+            imgx = topx.imshow(x[:, :, 0], cmap='gray')
+            plt.colorbar(imgx, ax=topx, format='%.0e', shrink=1)
+            topx.set_title(r'$\widebar{X} : $' f'{np.mean(x[:, :, :]):.2e}\n'
+                           r'$\text{Var}(X): $' f'{np.var(x[:, :, :]):.2e}')
 
 
-        #botx.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left', rwidth=0.8)
-        botx.plot(xbins, gamma_mass_function(I0, Lx, xbins), color='orange')
-        botx.scatter(xbins, xhist)
-        for i in range(len(xbins)):
-            botx.plot([xbins[i], xbins[i]], [0, xhist[i]], '--k', lw=0.5)
-        botx.set_xlabel('Intensité sur un pixel')
+            #botx.hist(x.flatten(), density=True, stacked=True, bins=x_real, align='left', rwidth=0.8)
+            botx.plot(xbins, gamma_mass_function(I0, Lx, xbins), color='orange')
+            botx.scatter(xbins, xhist)
+            for i in range(len(xbins)):
+                botx.plot([xbins[i], xbins[i]], [0, xhist[i]], '--k', lw=0.5)
+            botx.set_xlabel('Intensité sur un pixel')
 
+#plot_figure([1e-3, 5e-3, 1e-2], [1, 5, 10], 128, 1500)
 plt.show()
 
+I0 = 1e-2
+Lx = 6
+N = 128
+M = 4000
+_, y = sim_pg_distrib(I0, Lx, (N, N, M))
+m1 = np.mean(y)
+m2 = np.mean(y**2)
+print(m1, m2)
 
 ## TEST FONCTIONS DENSITE ET COHERENCE AVEC LOI DE BERNOUILI
 # Lx = 2
