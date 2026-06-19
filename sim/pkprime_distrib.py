@@ -4,7 +4,7 @@ sys.path.append('..')
 from utils.math import *
 from utils.func import *
 
-def pkprime_distrib(I0, Li, Lx, size):
+def pkprime_distrib(I0, Li, Lx, size, frame):
     """
     @param:
         - I0: Beam intensity
@@ -16,17 +16,17 @@ def pkprime_distrib(I0, Li, Lx, size):
         - numpy array (with size 'size') of the distribution of the intensity on the sensor
         - numpy array (with size 'size') of photon counts on the sensor
     """
-    (N1, N2) = frame_dim(size)
+    (N1, N2)    = frame_dim(size)
 
     ## Simulates the fluctuations of intensity of the beam
-    I = gamma_law(Li, 1)
-    I *= I0
+    I           = gamma_law(Li, frame)
+    I           *= I0
 
     ## Simulates the speckle
-    x = gamma_law(Lx, size)
-    x *= I
+    x           = gamma_law(Lx, (N1, N2, frame))
+    x[:, :]     *= I
 
     ## Simulates the photon counting on the sensor
-    y = poisson_law(x, size)
+    y           = poisson_law(x, (N1, N2, frame))
 
     return x, y
