@@ -18,13 +18,12 @@ def frame_dim(size):
     return (N1, N2)
 
 def progress_bar(n, maxn, mean_time, progress_bar_length=50):
-    print("", end='')
-    print(f'\r{n}/{max}\t- {int(n/maxn * 100) : 4d}% ', end='')
+    print('\033[2K\r', end='')
+    print(f'{n}/{maxn}\t- {int(n/maxn * 100) : 4d}% ', end='')
     print('[', end='')
-    print('#' * int(np.ceil(n/maxn * progress_bar_length)), end='')
-    print('.' * int(progress_bar_length - np.ceil(n/maxn * progress_bar_length)), end='')
-    print('] ', end='')
-    print('[ est. ', end='')
+    print('#' * int(np.ceil(n/maxn * progress_bar_length))
+          + '.' * int(progress_bar_length - np.ceil(n/maxn * progress_bar_length)), end='')
+    print('] [ est. ', end='')
     if mean_time.tm_hour > 0:
         print(f'{mean_time.tm_hour}h ', end='')
         print(f'{mean_time.tm_min}m ', end='')
@@ -33,4 +32,4 @@ def progress_bar(n, maxn, mean_time, progress_bar_length=50):
         print(f'{mean_time.tm_sec}s ', end='')
     elif mean_time.tm_sec > 0:
         print(f'{mean_time.tm_sec}s ', end='')
-    print(']', end='')
+    print(']', end='', flush=True)
