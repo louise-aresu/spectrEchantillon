@@ -5,7 +5,7 @@ sys.path.append('..')
 from utils.func import *
 from utils.math import *
 
-def sim_pg_distrib(I0, Lx, size):
+def sim_pg_distrib(I0, Lx, size, gen=None):
     """
     @param:
         - I0: Beam intensity
@@ -18,10 +18,10 @@ def sim_pg_distrib(I0, Lx, size):
     """
 
     ## Simulates the speckle
-    x = gamma_law(Lx, size)
+    x = gamma_law(Lx, size, gen)
     x *= I0
 
     ## Simulates the photon counting on the sensor
-    y = poisson_law(x, size)
+    y = poisson_law(x, size, gen)
 
     return x, y

@@ -6,7 +6,7 @@ gen = np.random.default_rng()
 def poisson_mass_function(mu, k):
     return np.exp(-mu)*(mu**k)/factorial(k)
 
-def gamma_law(L, size):
+def gamma_law(L, size, gen1=None):
     """
     @param:
         - L : Degrees of freedom
@@ -19,6 +19,8 @@ def gamma_law(L, size):
     Multiply stochastic representations for K distributions and  their Poisson transforms
     by Malvin G. Teich and Paul DIament
     """
+    if gen1 != None:
+        return gen1.gamma(shape=L, scale=1/L, size=size)
     return gen.gamma(shape=L, scale=1/L, size=size)
 
 
@@ -39,7 +41,7 @@ def gamma_mass_function(mu, L, x):
     return 1/gamma(L)*np.exp(-L*x/mu)*(L/mu)**L * x**(L-1)
 
 
-def poisson_law(mu, size):
+def poisson_law(mu, size, gen1=None):
     """
     @param:
         - mu : Mean
@@ -49,6 +51,8 @@ def poisson_law(mu, size):
 
     Returns an array of realizations of the Poisson law
     """
+    if gen1 != None:
+        return gen1.poisson(lam=mu, size=size)
     return gen.poisson(lam=mu, size=size)
 
 
