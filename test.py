@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 init_printing(use_unicode=True)
 
 N = 128
-M = 1500
-I0 = 5e-3
-Lx = 4
+M = 7500
+I0 = 1e-2
+Lx = 6
 
 mu, L, k = symbols('mu L k')
 
@@ -27,12 +27,12 @@ J = Matrix([[m1m, m1L], [m2m, m2L]])
 p = L / (mu + L)
 K = NegativeBinomial("k", L, p)
 
-print(simplify(variance(K)))
-
 lB = diff(ln(beta(L, k)), L, L)
 
 IFisher = Matrix([[E(lB/k*K),-1/p],
                   [-1/p, L/(p**2*(1-p))]])
 
-print((IFisher**-1).evalf(subs={mu:1e-2, L:5}))
-print(((J.transpose()*J)**-1).evalf(subs={mu:1e-2, L:5}))
+#print(IFisher)
+
+print(((IFisher**-1)/(N**2*M)).diagonal().applyfunc(sqrt).evalf(subs={mu:I0, L:Lx}))
+#print((((J.transpose()*J)**-1).diagonal().applyfunc(sqrt).evalf(subs={mu:I0, L:Lx}) / sqrt(N**2*M)).evalf())

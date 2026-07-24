@@ -1,6 +1,7 @@
 import numpy as np
 from sympy import *
 from sim.pg_distrib import *
+from estim.moments import *
 import matplotlib.pyplot as plt
 import time
 from itertools import product
@@ -233,51 +234,22 @@ def compar_expl_iter(I0, Lx, N, M, lim=None, steps=3, resolution=30, nbsimu=20, 
     plt.hlines(Lx, xmin, xmax, linestyle=':', color='k')
     plt.legend()
 
-def carac_expl(I0s, Lxs, N, M, nbsimu=20, gen=None):
-    lenI0 = len(I0s)
+def carac_expl(I0, Lxs, N, M, nbsimu=20, gen=None):
     lenLx = len(Lxs)
 
-    biais = np.ndarray((lenI0, lenLx))
-    variance = np.ndarray((lenI0, lenLx))
-
-    buffer = np.ndarray(nbsimu)
-    times = np.ndarray(lenI0*lenLx*nbsimu)
-    count = 0
-
-    def sim(args):
-        nonlocal count
-        i, l = args
-        for n in range(nbsimu):
-            start = time.time()
-            _, y = sim_pg_distrib(I0s[i], Lxs[l], (N, N, M), gen=gen)
-            m1 = np.mean(y)
-            m2 = np.mean(y ** 2)
-            buffer[n] = m1 ** 2 / (m2 - m1 ** 2 - m1)
-            end = time.time()
-            times[count] = end - start
-            count += 1
-        progress_bar(count, lenI0 * lenLx * nbsimu, np.mean(times[:count]))
-        biais[i, l] = np.abs(Lxs[l] - np.mean(buffer))
-        variance[i, l] = np.var(buffer)
-
-    with mp.Pool() as pool:
-        _ = pool.map(sim, iter([(i, l) for i in range(lenI0) for l in range(lenLx)]))
+    biais = np.ndarray(lenLx)
+    variance = np.ndarray(lenLx)
+    for l in range(len(Lxs)):
+        print(f'Lx: {Lxs[l]}')
+        _, (Lxe, Lxv) = monte_carlo_pg(I0, Lxs[l], N, M, nbsimu=nbsimu, gen=gen, log=True)
+        biais[l] = (Lxe - Lxs[l])*100/Lxs[l]
+        variance[l] = Lxv
 
     plt.figure()
-    plt.title(r'Biais en fonction de $I_0$ et $L_X$')
-    plt.imshow(np.log(biais), aspect='auto',
-               extent=(np.min(Lxs), np.max(Lxs), np.min(I0s), np.max(I0s)))
-    plt.xlabel(r'$L_X$')
-    plt.ylabel(r'$I_0$')
-    plt.colorbar()
+    plt.plot(Lxs, biais, '--')
+    plt.xlabel(r'$L_X$ de simulation')
+    plt.ylabel(r'Biais en %')
 
-    plt.figure()
-    plt.title(r'Variance en fonction de $I_0$ et $L_X$')
-    plt.imshow(np.log(variance), aspect='auto',
-               extent=(np.min(Lxs), np.max(Lxs), np.min(I0s), np.max(I0s)))
-    plt.xlabel(r'$L_X$')
-    plt.ylabel(r'$I_0$')
-    plt.colorbar()
 
 #seed = np.random.randint(2**32)
 #histogramme_explicite(5e-3, 4 ,128, 1500, 200, gen=np.random.default_rng(seed))
@@ -288,55 +260,61 @@ def carac_expl(I0s, Lxs, N, M, nbsimu=20, gen=None):
 #compar_expl_iter(1e-3, 4, 128, 37500, resolution=20, lim=[0.1, 10], nbsimu=10)
 #carac_expl([1e-3, 5e-3, 1e-2, 1e-1], np.arange(1, 11, 1), 128, 100, nbsimu=10)
 
-I0s = [1e-3, 5e-3, 1e-2, 1e-1]
+I0s = [1e-3]
 Lxs = np.arange(1, 11)
 N = 128
-M = 7500
-nbsimu = 10
+M = 1000
+nbsimu = 2
 lenI0 = len(I0s)
 lenLx = len(Lxs)
 
 biais = np.ndarray((lenI0, lenLx))
-variance = np.ndarray((lenI0, lenLx))
+std = np.ndarray((lenI0, lenLx))
 
 def sim(args):
-    buffer = np.ndarray(nbsimu)
     i, l = args
-    for n in range(nbsimu):
-        _, y = sim_pg_distrib(I0s[i], Lxs[l], (N, N, M), gen=gen)
-        m1 = np.mean(y)
-        m2 = np.mean(y ** 2)
-        buffer[n] = m1 ** 2 / (m2 - m1 ** 2 - m1)
-    print(i, l)
-    return (i, l), np.abs(Lxs[l] - np.mean(buffer))*100/Lxs[l], np.sqrt(np.var(buffer))
+    _, (Lxe, Lxv) = monte_carlo_pg(i, l, N, M, nbsimu, gen=None, log=None, hist=None)
+    print(f'Finished process : I {i: .2e} L {l}')
+    return [np.abs(l - Lxe)*100/l, np.sqrt(Lxv)]
 
 
 if __name__ == '__main__':
-    with mp.Pool() as pool:
+    # with mp.Pool() as pool:
+    #     result = pool.map(sim, [(i, l) for i in I0s for l in Lxs])
+    #
+    # result = np.array(result).reshape((lenI0, lenLx, 2))
+    # biais = result[:, :, 0]
+    # std = result[:, :, 1]
+    #
+    # with open('data_carac_2.npy', 'wb') as f:
+    #     np.save(f, np.array([biais, std]))
 
-        result = pool.map_async(sim, [(i, l) for i in range(lenI0) for l in range(lenLx)])
-        result.wait()
+    # plt.figure()
+    # plt.title(r'Biais en fonction de $I_0$ et $L_X$')
+    # plt.imshow(biais, aspect='auto', origin="lower",
+    #            extent=(np.min(Lxs), np.max(Lxs), np.min(I0s), np.max(I0s)))
+    # plt.xlabel(r'$L_X$')
+    # plt.ylabel(r'$I_0$')
+    # plt.colorbar()
+    #
+    # plt.figure()
+    # plt.title(r'Ecart-type en fonction de $I_0$ et $L_X$')
+    # plt.imshow(np.log(variance), aspect='auto', origin="lower",
+    #            extent=(np.min(Lxs), np.max(Lxs), np.min(I0s), np.max(I0s)))
+    # plt.xlabel(r'$L_X$')
+    # plt.ylabel(r'$I_0$')
+    # plt.colorbar()
+    #
+    # plt.show()
 
-    for pos, b, v in result.get():
-        biais[pos] = b
-        variance[pos] = v
+    # with open('data_carac_1.npy', 'rb') as f:
+    #     biais, std = np.load(f)
+    #
+    # I, J = np.shape(biais)
+    # for j in range(J):
+    #     print(f'Lx: {Lxs[j]} => {biais[0, j] : 2.0f} : {std[0, j] : .2e}')
 
-    biais[biais > 100] = 100
-
-    plt.figure()
-    plt.title(r'Biais en fonction de $I_0$ et $L_X$')
-    plt.imshow(biais, aspect='auto',
-               extent=(np.min(Lxs), np.max(Lxs), np.min(I0s), np.max(I0s)))
-    plt.xlabel(r'$L_X$')
-    plt.ylabel(r'$I_0$')
-    plt.colorbar()
-
-    plt.figure()
-    plt.title(r'Ecart-type en fonction de $I_0$ et $L_X$')
-    plt.imshow(np.log(variance), aspect='auto',
-               extent=(np.min(Lxs), np.max(Lxs), np.min(I0s), np.max(I0s)))
-    plt.xlabel(r'$L_X$')
-    plt.ylabel(r'$I_0$')
-    plt.colorbar()
+    #_, (Lxe, Lxv) = monte_carlo_pg(1e-2, 6, 128, 7500, gen=None, log=True, hist=False, nbsimu=50)
+    #carac_expl(1e-2, np.arange(1, 11), 128, 15000, 20)
 
     plt.show()

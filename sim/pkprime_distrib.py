@@ -24,7 +24,8 @@ def pkprime_distrib(I0, Li, Lx, size, frame):
 
     ## Simulates the speckle
     x           = gamma_law(Lx, (N1, N2, frame))
-    x[:, :]     *= I
+    for m in range(frame):
+        x[:, :, m] *= I[m]
 
     ## Simulates the photon counting on the sensor
     y           = poisson_law(x, (N1, N2, frame))

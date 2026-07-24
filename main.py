@@ -65,17 +65,14 @@ def plot_figure(I0s, Lxs, N, M):
                 botx.plot([xbins[i], xbins[i]], [0, xhist[i]], '--k', lw=0.5)
             botx.set_xlabel('Intensité sur un pixel')
 
-#plot_figure([1e-3, 5e-3, 1e-2], [1, 5, 10], 128, 1500)
+
+plot_figure([1e-3, 5e-3, 1e-2], [1, 5, 10], 128, 7500)
 plt.show()
 
-I0 = 1e-2
-Lx = 6
-N = 128
-M = 4000
-_, y = sim_pg_distrib(I0, Lx, (N, N, M))
-m1 = np.mean(y)
-m2 = np.mean(y**2)
-print(m1, m2)
+#_, y = sim_pg_distrib(I0, Lx, (N, N, M))
+#m1 = np.mean(y)
+#m2 = np.mean(y**2)
+#print(m1, m2)
 
 ## TEST FONCTIONS DENSITE ET COHERENCE AVEC LOI DE BERNOUILI
 # Lx = 2
