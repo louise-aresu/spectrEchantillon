@@ -1,6 +1,7 @@
 import numpy as np
 from sympy import *
 from sympy.stats import *
+from sympy import digamma
 from utils.math import *
 from sim.pg_distrib import *
 import matplotlib.pyplot as plt
@@ -8,31 +9,16 @@ import matplotlib.pyplot as plt
 init_printing(use_unicode=True)
 
 N = 128
-M = 7500
+M = 4500
 I0 = 1e-2
-Lx = 6
+Lx = 10
 
-mu, L, k = symbols('mu L k')
+mu, L, k = symbols('mu L k', real=True)
+K = NegativeBinomial("k", L, L/(mu+L))
 
-m1 = mu
-m2 = mu ** 2 * (1 + 1 / L) + mu
+def Esp(f, max=100):
+    return Sum(f * density(K)(k), (k, 0, max))
 
-m1m = diff(m1, mu)
-m2m = diff(m2, mu)
-m1L = diff(m1, L)
-m2L = diff(m2, L)
+InL = mu/L * 2 * polygamma(0, L) + mu**2*(L+1)/L**2 + mu/L + polygamma(0, L)**2 + Esp(polygamma(0, k+L)**2) -2*polygamma(0, L) * Esp(polygamma(0, k+L)) - 2/L * Esp(polygamma(0, k+L) * k)
 
-J = Matrix([[m1m, m1L], [m2m, m2L]])
-
-p = L / (mu + L)
-K = NegativeBinomial("k", L, p)
-
-lB = diff(ln(beta(L, k)), L, L)
-
-IFisher = Matrix([[E(lB/k*K),-1/p],
-                  [-1/p, L/(p**2*(1-p))]])
-
-#print(IFisher)
-
-print(((IFisher**-1)/(N**2*M)).diagonal().applyfunc(sqrt).evalf(subs={mu:I0, L:Lx}))
-#print((((J.transpose()*J)**-1).diagonal().applyfunc(sqrt).evalf(subs={mu:I0, L:Lx}) / sqrt(N**2*M)).evalf())
+print(1/(N**2*M*Esp((diff(ln(density(K)(k)), L))**2)).subs({mu:I0, L:Lx}).evalf())
