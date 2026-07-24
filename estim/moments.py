@@ -55,5 +55,29 @@ def monte_carlo_pg(I0, Lx, N, M, nbsimu, gen=None, log=True, hist=False, vals='v
     return ((I0e, I0v), (Lxe, Lxv))
 
 if __name__ == "__main__":
-    (_, I0v), (_, Lxv) = monte_carlo_pg(1e-2, 2, 128, 4500, 20)
-    print(I0v, Lxv)
+    # I0 = 1e-3
+    # Lx = 10
+    # N = 128
+    # M = 750
+    # nbsimu = 20
+    #
+    # nmontecarlo = 20
+    # temps = np.ndarray(nmontecarlo)
+    # biais = np.ndarray(nmontecarlo)
+    # variance = np.ndarray(nmontecarlo)
+    # for n in range(nmontecarlo):
+    #     start = tm.time()
+    #     (I0e, I0v), _ = monte_carlo_pg(I0, Lx, N, M, nbsimu, log=False)
+    #     biais[n] = np.abs(I0 - I0e)/I0 * 100
+    #     variance[n] = I0v/I0 * 100
+    #     end = tm.time()
+    #     temps[n] = end - start
+    #     progress_bar(n+1, nmontecarlo, np.mean(temps[:n+1]))
+    #
+    # print("Biais :")
+    # print("moy ", np.mean(biais))
+    # print("std ", np.std(biais))
+    # print("Variance :")
+    # print("moy ", np.mean(variance))
+    # print("std ", np.std(variance))
+    print(monte_carlo_pg(1e-2, 10, 128, 4500, 100))
